@@ -24,7 +24,7 @@ import plotly.graph_objs as go
 # from query import *
 
 st.set_page_config(page_title="Dashboard",page_icon="🌍",layout="wide")
-st.header("MORBILIDAD:  Tratamiento Estadístico, KPI y Tendencias")
+st.header("EVENTOS DE MORTALIDAD EN SALUD MENTAL, FAMILIA Y CONVIVENCIA CIUDADANA")
 
 # Todos los gráficos se personalizan usando CSS , no Streamlit. 
 theme_plotly = None 
