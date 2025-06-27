@@ -1,0 +1,15 @@
+streamlit
+folium==0.14.0
+streamlit-folium==0.15.0
+pandas
+numpy
+numerize
+matplotlib
+plotly
+scikit-learn
+seaborn
+scipy
+openpyxl
+streamlit-option-menu==0.3.2
+streamlit-extras
+deprecation
