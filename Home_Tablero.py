@@ -41,7 +41,11 @@ with open('style.css')as f:
 # cargar archivo Excel | comente esta línea cuando obtenga datos de MySQL:
 
 # df = pd.read_excel("C:/Users/cesar/Downloads/TABLERO_STREAMLIT_DASHBOARD/DASHBOARD_Morbilidad_DESPLIEGUE/Tasas_Morbilidad.xlsx", sheet_name='Hoja1')
-df = pd.read_csv('Tasas_Mortalidad2.csv')
+try:
+    df = pd.read_csv('Tasas_Mortalidad2.csv', encoding='utf-8')
+except UnicodeDecodeError:
+    # Prueba con Latin-1 si falla UTF-8
+    df = pd.read_csv('Tasas_Mortalidad2.csv', encoding='latin-1')
 
 # Convirtiendo la columna Anio a Categórica:
     # Opción 2: Convertir a categórica (más eficiente)
