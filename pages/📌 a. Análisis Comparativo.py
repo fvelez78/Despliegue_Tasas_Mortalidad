@@ -5,7 +5,7 @@ import numpy as np
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Análisis de Morbilidad",
+    page_title="Analítica de Tasas de Mortalidad",
     page_icon="📊",
     layout="wide"
 )
@@ -13,7 +13,7 @@ st.set_page_config(
 # Cargar dataframe
 @st.cache_data
 def load_data():
-    df = pd.read_excel('Tasas_Morbilidad.xlsx', sheet_name='Hoja1')
+    df = pd.read_csv('Tasas_Mortalidad2.xlsx')
     # Convertir año a categórica
     df['anio'] = df['anio'].astype(str)
     # Crear columna Periodo
@@ -26,41 +26,49 @@ df = load_data()
 st.sidebar.image("data/logo1.png")
 
 # Título principal
-st.title("📊 Análisis Comparativo de Morbilidad")
+st.title("📊 Analítica de Tasas de Mortalidad")
 
 # === SECCIÓN 1: TABLA DE FRECUENCIAS ===
-st.header("📈 Tabla de Frecuencias por Categoría de Edad")
+st.header("📈 Eventos de Mortalidad en Salud Mental por departamento")
+df1=df[df['capitulo']=='Trastornos mentales y del comportamiento']
+tabla_cruzada = pd.crosstab(
+    df1['grupo'],
+    df1['departamento'],
+    normalize='columns'
+) * 100
+
+tabla_cruzada = tabla_cruzada.round(2)
 
 # Calcular frecuencias
-frequency = df.nombre_cat_edad.value_counts().sort_index()
-percentage_frequency = frequency / len(df.nombre_cat_edad) * 100
-cumulative_frequency = frequency.cumsum()
-relative_frequency = frequency / len(df.nombre_cat_edad)
-cumulative_relative_frequency = relative_frequency.cumsum()
+#frequency = df.nombre_cat_edad.value_counts().sort_index()
+#percentage_frequency = frequency / len(df.nombre_cat_edad) * 100
+#cumulative_frequency = frequency.cumsum()
+#relative_frequency = frequency / len(df.nombre_cat_edad)
+#cumulative_relative_frequency = relative_frequency.cumsum()
 
 # Crear tabla resumen
-summary_table = pd.DataFrame({
-    'Freq.': frequency,
-    '% Freq.': percentage_frequency,
-    'Freq. Acum.': cumulative_frequency,
-    'Freq. Relat.': relative_frequency,
-    'Freq. Relat. Acum.': cumulative_relative_frequency
-})
+#summary_table = pd.DataFrame({
+#    'Freq.': frequency,
+#    '% Freq.': percentage_frequency,
+#    'Freq. Acum.': cumulative_frequency,
+#    'Freq. Relat.': relative_frequency,
+#    'Freq. Relat. Acum.': cumulative_relative_frequency
+#})
 
 # Selector de columnas para mostrar
-showData = st.multiselect(
-    "### FILTRO - Selecciona las columnas a mostrar:",
-    summary_table.columns.tolist(),
-    default=summary_table.columns.tolist()
-)
+#showData = st.multiselect(
+#    "### FILTRO - Selecciona las columnas a mostrar:",
+#    summary_table.columns.tolist(),
+#    default=summary_table.columns.tolist()
+#)
 
-if showData:
-    st.dataframe(summary_table[showData], use_container_width=True)
-else:
-    st.warning("Selecciona al menos una columna para mostrar")
+#if showData:
+#    st.dataframe(summary_table[showData], use_container_width=True)
+#else:
+#    st.warning("Selecciona al menos una columna para mostrar")
 
 # === SECCIÓN 2: GRÁFICO INTERACTIVO ===
-st.header("📊 Frecuencia de Morbilidad por Departamento y Categoría de Edad")
+st.header("📊 Frecuencia de Mortalidad por grupo de enfermedad mental")
 
 # Crear columnas para los filtros
 col1, col2 = st.columns(2)
@@ -76,7 +84,7 @@ with col1:
 
 with col2:
     # Dropdown para categoría de edad (agregando opción "Todas")
-    categorias_options = ['Todas'] + list(df['nombre_cat_edad'].unique())
+    categorias_options = ['Todas'] + list(df1['nombre_cat_edad'].unique())
     categoria_edad_selected = st.selectbox(
         "Selecciona categoría de edad:",
         options=categorias_options,
@@ -86,7 +94,7 @@ with col2:
 # Función para actualizar gráfico
 def crear_grafico(departamento, nombre_cat_edad):
     # Filtrar datos según las selecciones
-    df_filtrado = df.copy()
+    df_filtrado = df1.copy()
     
     # Aplicar filtro de departamento
     if departamento != 'Todos':
@@ -102,20 +110,20 @@ def crear_grafico(departamento, nombre_cat_edad):
     
     # Determinar título del gráfico
     if departamento == 'Todos' and nombre_cat_edad == 'Todas':
-        titulo = 'Casos de Morbilidad - Todos los Departamentos y Categorías de Edad'
+        titulo = 'Casos de Mortalidad en Trastornos mentales y del comportamiento - Todos los Departamentos y Categorías de Edad'
     elif departamento == 'Todos':
-        titulo = f'Casos de Morbilidad - Todos los Departamentos - {nombre_cat_edad}'
+        titulo = f'Casos de Mortalidad en Trastornos mentales y del comportamiento- Todos los Departamentos - {nombre_cat_edad}'
     elif nombre_cat_edad == 'Todas':
-        titulo = f'Casos de Morbilidad en {departamento} - Todas las Categorías de Edad'
+        titulo = f'Casos de Mortalidad en Trastornos mentales y del comportamiento en {departamento} - Todas las Categorías de Edad'
     else:
-        titulo = f'Casos de Morbilidad en {departamento} - {nombre_cat_edad}'
+        titulo = f'Casos de Morbilidad en Trastornos mentales y del comportamiento en {departamento} - {nombre_cat_edad}'
     
     # Agrupar datos
     if 'sexo' in df_filtrado.columns:
         # Si tienes columna de casos específica, úsala; si no, cuenta las filas
         if 'Enfermedad_Evento' in df_filtrado.columns:
-            df_agg = df_filtrado.groupby(['Periodo', 'sexo'])['Enfermedad_Evento'].count().reset_index()
-            y_column = 'Enfermedad_Evento'
+            df_agg = df_filtrado.groupby(['Periodo', 'sexo'])['grupo'].count().reset_index()
+            y_column = 'grupo'
         else:
             # Contar filas por grupo
             df_agg = df_filtrado.groupby(['Periodo', 'sexo']).size().reset_index(name='Casos')
@@ -137,9 +145,9 @@ def crear_grafico(departamento, nombre_cat_edad):
         
     else:
         # Si no hay columna sexo, hacer gráfico simple
-        if 'Enfermedad_Evento' in df_filtrado.columns:
-            df_agg = df_filtrado.groupby('Periodo')['Enfermedad_Evento'].count().reset_index()
-            y_column = 'Enfermedad_Evento'
+        if 'grupo' in df_filtrado.columns:
+            df_agg = df_filtrado.groupby('Periodo')['grupo'].count().reset_index()
+            y_column = 'grupo'
         else:
             df_agg = df_filtrado.groupby('Periodo').size().reset_index(name='Casos')
             y_column = 'Casos'
@@ -184,12 +192,12 @@ with col3:
 
 # Mostrar vista previa del dataset
 with st.expander("🔎 Ver Vista Previa del Dataset"):
-    st.dataframe(df.head(), use_container_width=True)
+    st.dataframe(df1.head(), use_container_width=True)
 
 # Información sobre las columnas
 with st.expander("📋 Información de Columnas"):
     st.write("**Columnas disponibles en el dataset:**")
-    for i, col in enumerate(df.columns, 1):
+    for i, col in enumerate(df1.columns, 1):
         st.write(f"{i}. **{col}** - Tipo: {df[col].dtype}")
 
 ##3
